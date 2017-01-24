@@ -3,8 +3,8 @@
 #------------------ 20 dec. 2016 ----------------------
 
 #### Setting environnement ####
-
-setwd("D:/master-DM/cours/text-mining/projet/")
+this.dir <- dirname(rstudioapi::getActiveDocumentContext()$path)
+setwd(this.dir)
 
 # includes libraries we need
 library(dplyr)
@@ -50,7 +50,7 @@ book.corpus.processed <- tm_map(book.corpus, content_transformer(tolower))
 # remove numbers
 book.corpus.processed <- tm_map(book.corpus.processed, removeNumbers)
 # remove stop-words ("le"...)
-book.corpus.processed <- tm_map(book.corpus.processed, removeWords,stopwords("french"))
+book.corpus.processed <- tm_map(book.corpus.processed, removeWords,)
 
 # create tdm
 tdm <- TermDocumentMatrix(book.corpus.processed, control=list(wordLengths=c(2,Inf)))
@@ -108,19 +108,6 @@ data(MisNodes)
 #              Group = "group", opacity = 0.8)
 
 
-fakeNetwork <- function(){
-  nodes <- data.frame(name = c("Bob", "Alice","Philippe", "Jean", "Sophie", "Vincent"), group=rep(1,6))
-  # vec1 <- c("Bob", "Alice", "Alice", "Philipe", "Jean", "Jean", "Sophie", "Vincent", "Vincent" )
-  # vec2 <- c("Alice", "Jean", "Vincent", "Alice", "Bob", "Sophie", "Vincent", "Bob", "Jean")
-  vec1 <- c(1, 2, 2, 3, 4, 4, 5, 0, 0)
-  vec2 <- c(2, 4, 0, 2, 1, 5, 0, 1, 4)
-  vec3 <- c(10,21,1,2,3,37,5,67,5)
-  links <- data.frame(source=vec1, target=vec2, value=vec3)
-  forceNetwork(Links = links, Nodes = nodes,
-               Source = "source", Target = "target",
-               Value = "value", NodeID = "name",
-               Group = "group", opacity = 0.8)
-}
 
 
 #1.
