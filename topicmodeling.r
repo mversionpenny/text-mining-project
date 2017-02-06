@@ -1,33 +1,33 @@
+this.dir <- dirname(rstudioapi::getActiveDocumentContext()$path)
+setwd(this.dir)
 
 library(rJava)
 library(mallet)
+source("projet.R")
 
 
 # Reading the data file
 
 Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_111')
-setwd("D:/master-DM/cours/text-mining/projet/")
-hp <- readLines(".//les_rois_maudits//txt//rois_maudits.txt", encoding="UTF-8")
-hp <- hp[!(is.na(hp) | hp=="")]
-# f <-  function(x) return(gsub("\u2019"," ",x))
-# hp <- sapply(hp,f,USE.NAMES = FALSE)
-lda.id <- 1:length(hp)
+
+
+lda.id <- 1:length(book)
 
 # setting the delimiters
 token.regexp <- "\\p{L}[\\p{L}\\p{P}]+\\p{L}"
 
 # using my own stop list for English
-stoplist <- "./Stop-words-french.txt"
+stoplist <- "./Stop-words-french-utf8.txt"
 #stoplist <- stopwords("french")
   
 # including stopwords
-mallet.instances <- mallet.import(as.character(lda.id), hp, stoplist, token.regexp = token.regexp)
-#mallet.instances <- mallet.import(as.character(lda.id), hp, "data/empty.txt", token.regexp = token.regexp)
+mallet.instances <- mallet.import(as.character(lda.id), book, stoplist, token.regexp = token.regexp)
+#mallet.instances <- mallet.import(as.character(lda.id), book, "data/empty.txt", token.regexp = token.regexp)
 
 # Estimation of LDA parameters
 
 # number of expected topics
-k <- 20
+k <- 40
 
 # preparation
 topic.model <- MalletLDA(num.topics=k)
@@ -59,7 +59,7 @@ doc.topics <- mallet.doc.topics(topic.model, smoothed=T, normalized=T)
 # topics x words matrix
 topic.words <- mallet.topic.words(topic.model, smoothed=T, normalized=T)
 
-topic.todisp <- 1:20
+topic.todisp <- 1:40
 m.disp <- do.call(cbind,
                   sapply(topic.todisp,
                          function(x) format(mallet.top.words(topic.model, topic.words[x,]))))
@@ -68,32 +68,30 @@ m.disp
 
 # What is the topic distribution of one particular document?
 
-numdoc <- 2
-hp[numdoc]
-best.topics <- order(doc.topics[numdoc,], decreasing=T)[1:10]
-rbind(best.topics,sprintf("%.3f",doc.topics[numdoc, best.topics]))
-
-m.disp <- do.call(cbind,
-                  sapply(best.topics,
-                         function(x) format(mallet.top.words(topic.model, topic.words[x,]))))
-colnames(m.disp) <- sapply(best.topics, function(x) c(paste("z",x), "p(w/z)"))
-m.disp
+# numdoc <- 2
+# book[numdoc]
+# best.topics <- order(doc.topics[numdoc,], decreasing=T)[1:25]
+# rbind(best.topics,sprintf("%.3f",doc.topics[numdoc, best.topics]))
+# 
+# m.disp <- do.call(cbind,
+#                   sapply(best.topics,
+#                          function(x) format(mallet.top.words(topic.model, topic.words[x,]))))
+# colnames(m.disp) <- sapply(best.topics, function(x) c(paste("z",x), "p(w/z)"))
+# m.disp
 
 # Computing the top documents for one particular topic.
 
-pz <- colSums(doc.topics)/(length(hp))
+pz <- colSums(doc.topics)/(length(book))
 # p(d/z) = p(d/z)*p(d)/p(z) with uniform p(d)
-num.pdz <- doc.topics * (1/length(hp))
+num.pdz <- doc.topics * (1/length(book))
 pd.z <- t(num.pdz) * (1/pz) # the last term is optional, doesn't change the ranking
 
 # Infering the topic distribution for a new document.
 
 # First, get the list of words from your new document.
 
-# ch <- "Harry lives number four private drive under the stairs."
-# ch <- "He likes playing quidditch and chasing the golden snitch."
-# ch <- "Harry lives number four private drive under the stairs. He likes playing quidditch and chasing the golden snitch."
-ch <- "Philippe le Bel"
+
+ch <- "jeanne"
 ch.processed <- unlist(strsplit(tolower(ch), "[^[:alpha:]]"))
 
 index.w <- match(ch.processed,vocabulary)
@@ -118,4 +116,91 @@ message("p(z/d):")
 sprintf("%.3f",sort(pz.ch, decreasing=T)[1:10])
 
 mallet.top.words(topic.model, topic.words[9,])
+
+getNetworkWithAssocs <- function(tdm, characters.list, characters.vector){
+  
+  nodes <- data.frame(name = characters.vector, group=rep(1,length(characters.vector)))
+  vec1 <- c()
+  vec2 <- c()
+  vec3 <- c()
+  
+  for(j in 1:(length(characters.list)-1)){
+    lengthJ <- length(characters.list[[j]])
+    character <- characters.list[[j]][1]
+    assocs <- sapply(names(unlist(findAssocs(tdm, character, 0.15))), 
+                     function(x) return(gsub(paste(character,".", sep=""), "", x)))
+    if(lengthJ==1) resultJ <- 1
+    else resultJ <- length(which(characters.list[[j]] %in% assocs))
+    
+    if(resultJ >= lengthJ/2){
+      for(k in (j+1):length(characters.list)){
+        lengthK <- length(characters.list[[k]])
+        resultK <- length(which(characters.list[[k]] %in% assocs))
+        if(resultK > lengthK/2){
+          vec1 <- c(vec1,(j-1))
+          vec2 <- c(vec2,(k-1))
+          vec3 <- c(vec3,1)
+        }
+        
+      }
+    }
+  }
+  
+  links <- data.frame(source=vec1, target=vec2, value=vec3)
+  
+  # forceNetwork(Links = links, Nodes = nodes,
+  #              Source = "source", Target = "target",
+  #              Value = "value", NodeID = "name",
+  #              Group = "group", opacity = 0.8)
+  
+  sankeyNetwork(Links = links, Nodes = nodes, Source = "source",
+                  Target = "target", Value = "value", NodeID = "name",
+                  units = "m", fontSize = 12, nodeWidth = 30)
+}
+
+getNetworkWithLDA <- function(m.disp, characters.list, characters.vector){
+  nodes <- data.frame(name = characters.vector, group=rep(1,length(characters.vector)))
+  vec1 <- c()
+  vec2 <- c()
+  vec3 <- c()
+  
+  i <- 1
+  nb.topics <- ncol(m.disp)
+  nb.words <- nrow(m.disp)
+  while(i < nb.topics) {
+    for(j in 1:(length(characters.list)-1)){
+      lengthJ <- length(characters.list[[j]])
+      resultJ <- length(which(characters.list[[j]] %in% m.disp[,i]))
+      if(resultJ >= lengthJ/2){
+        for(k in (j+1):length(characters.list)){
+          lengthK <- length(characters.list[[k]])
+          
+          resultK <- length(which(characters.list[[k]] %in% m.disp[,i]))
+          if(resultK >= lengthK/2){
+            vec1 <- c(vec1,(j-1))
+            vec2 <- c(vec2,(k-1))
+            vec3 <- c(vec3,1)
+          }
+
+        }
+      }
+    }
+    i <- i + 2
+  }
+  
+  links <- data.frame(source=vec1, target=vec2, value=vec3)
+
+  forceNetwork(Links = links, Nodes = nodes,
+               Source = "source", Target = "target",
+               Value = "value", NodeID = "name",
+               Group = "group", opacity = 0.8)
+  
+  # sankeyNetwork(Links = links, Nodes = nodes, Source = "source",
+  #                 Target = "target", Value = "value", NodeID = "name",
+  #                 units = "m", fontSize = 12, nodeWidth = 30)
+
+  
+}
+
+
 

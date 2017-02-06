@@ -50,7 +50,7 @@ book.corpus.processed <- tm_map(book.corpus, content_transformer(tolower))
 # remove numbers
 book.corpus.processed <- tm_map(book.corpus.processed, removeNumbers)
 # remove stop-words ("le"...)
-book.corpus.processed <- tm_map(book.corpus.processed, removeWords,)
+book.corpus.processed <- tm_map(book.corpus.processed, removeWords,stopwords("french"))
 
 # create tdm
 tdm <- TermDocumentMatrix(book.corpus.processed, control=list(wordLengths=c(2,Inf)))
@@ -174,7 +174,7 @@ fakeNetwork <- function(){
                Group = "group", opacity = 0.8)
 }
 
-findAssocs(tdm, "le", 0.2)
+findAssocs(tdm, "philippeiv", 0.15)
 
 firstNetwork <- function(tdm, characters.list, characters.vector){
   nodes <- data.frame(name = characters.vector, group=rep(1,length(characters.vector)))
