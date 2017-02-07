@@ -3,8 +3,15 @@
 #------------------ 20 dec. 2016 ----------------------
 
 #### Setting environnement ####
+# install missing packages
+list.of.packages <- c("rstudioapi", "RColorBrewer", "dplyr", "tm", "NLP", "wordcloud")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages, repos = "http://cran.rstudio.com/")
+
+# set working directory
 this.dir <- dirname(rstudioapi::getActiveDocumentContext()$path)
 setwd(this.dir)
+rm(list=ls())
 
 # includes libraries we need
 library(dplyr)
@@ -14,8 +21,7 @@ library(wordcloud)
 library(RColorBrewer)
 
 #### Creating corpus / cleaning data / tdm####
-
-book <- readLines(".//les_rois_maudits//txt//rois_maudits.txt", encoding = "UTF-8")
+book <- readLines("./les_rois_maudits/txt/rois_maudits.txt", encoding = "UTF-8")
 book <- book[!(is.na(book) | book=="")]
 
 # gettinr rid of punctuation
