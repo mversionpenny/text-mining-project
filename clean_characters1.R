@@ -90,10 +90,10 @@ characters <- unlist(str_replace_all(characters, "Frere Renaud", "Renaud"))
 
 ## Replace Gautier d'Aunay le pere with GautierdAunaylePere to seperate this
 # characer from his son
-book <- unlist(str_replace_all(book, "Gautier d'Aunay le pere", "GautierdAunaylePere"))
+book <- unlist(str_replace_all(book, "Gautier d'Aunay le pere", "dAunaylePere"))
 
 ## Gautier -> Gautier d'Aunay
-book <- unlist(str_replace_all(book, "Gautier ", "Gautier d'Aunay "))
+book <- unlist(str_replace_all(book, "Gautier d'Aunay|Gautier", "Gautier d'Aunay "))
 
 ## Replace de Nogaret, Nogaret with Guillaume de Nogaret
 book <- unlist(str_replace_all(book, "Guillaume de Nogaret|de Nogaret|Nogaret", "Guillaume de Nogaret"))
@@ -192,8 +192,20 @@ cressay <- which(str_detect(book, "Pierre et Jean")==TRUE)
 cressay <- c(cressay, 5132)
 book[latille] <- unlist(str_replace_all(book[latille], "Pierre", "Pierre de Latille"))
 book[cressay] <- unlist(str_replace_all(book[cressay], "Pierre", "Pierre de Cressay"))
-# Pierre de Cressay was deleted because it appeared only once, but now need to be readded
+# Pierre de Cressay was deleted because it appeared only once, but now need to be re-added
 characters <- c(characters, "Pierre de Cressay")
+
+## Seperate Louis
+
+## Seperate Charles
+
+## Seperate Guillaume
+
+## Seperate d'Aunay
+
+
+## Seperate Marigny
+
 
 #######################################################################
 ####                  Final save                                   ####
