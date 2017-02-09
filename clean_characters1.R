@@ -131,6 +131,7 @@ characters <- unlist(str_replace_all(characters, "Marguerite", "Marguerite de Bo
 
 ## Marie -> Marie de Cressay
 book <- unlist(str_replace_all(book, "Marie de Cressay|Marie", "Marie de Cressay"))
+characters <- c(characters, "Marie de Cressay")
 
 ## remove characters containning "Monseigneur", "Messire" (if not already remove), remove Magrigny
 rm.indx.extra <- c(rm.indx.extra, 61, 64, 65, 67:69, 71:74)
@@ -195,18 +196,11 @@ book[cressay] <- unlist(str_replace_all(book[cressay], "Pierre", "Pierre de Cres
 # Pierre de Cressay was deleted because it appeared only once, but now need to be re-added
 characters <- c(characters, "Pierre de Cressay")
 
-#######################################################################
-####                 Save list characters                          ####
-#######################################################################
-
 ## Create new character list 
 characters <- characters[-c(rm.indx.appear1, rm.indx.dupname, rm.indx.extra)]
 clean.char <- unlist(str_replace_all(characters, "[:blank:]", ""))
 clean.char <- removePunctuation(clean.char)
 clean.char <- sapply(clean.char, tolower, USE.NAMES = F)
-
-writeLines(characters, "les_rois_maudits/characters/characters1_clean.txt")
-writeLines(clean.char, "les_rois_maudits/characters/characters1_clean_lowercase.txt")
 
 #######################################################################
 ####                 Seperate duplicated firstname                 ####
@@ -217,6 +211,11 @@ writeLines(clean.char, "les_rois_maudits/characters/characters1_clean_lowercase.
 for (i in 1:length(characters)){
   book <- unlist(str_replace_all(book, characters[i], clean.char[i]))
 }
+
+## Seperate Charles, Charles = Charles de France
+book <-  unlist(str_replace_all(book, "Charles de France|Charles", "charlesdefrance"))
+characters <- c(characters, "Charles de France")
+clean.char <- c(clean.char, "charlesdefrance")
 
 ## Seperate Louis
 #  unimportant character
@@ -244,8 +243,11 @@ book[brothers] <-  unlist(str_replace_all(book[brothers], "d'Aunay", "gautierdau
 ## Seperate Marigny
 
 ## Seperate Philippe
-
-
+#######################################################################
+####                 Save list characters                          ####
+#######################################################################
+writeLines(characters, "les_rois_maudits/characters/characters1_clean.txt")
+writeLines(clean.char, "les_rois_maudits/characters/characters1_clean_lowercase.txt")
 ## Save book
-dir.create("les_rois_maudits/final_txt/", showWarnings = FALSE) 
-writeLines(book, "les_rois_maudits/final_txt/[Rois Maudits-1] Le Roi de fer - Druon,Maurice.txt")
+dir.create("les_rois_maudits/txt_processed_name/", showWarnings = FALSE) 
+writeLines(book, "les_rois_maudits/txt_processed_name/[Rois Maudits-1] Le Roi de fer - Druon,Maurice.txt")
