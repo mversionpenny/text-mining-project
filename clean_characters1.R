@@ -195,20 +195,8 @@ book[cressay] <- unlist(str_replace_all(book[cressay], "Pierre", "Pierre de Cres
 # Pierre de Cressay was deleted because it appeared only once, but now need to be re-added
 characters <- c(characters, "Pierre de Cressay")
 
-## Seperate Louis
-
-## Seperate Charles
-
-## Seperate Guillaume
-
-## Seperate d'Aunay
-
-
-## Seperate Marigny
-
-
 #######################################################################
-####                  Final save                                   ####
+####                 Save list characters                          ####
 #######################################################################
 
 ## Create new character list 
@@ -220,14 +208,44 @@ clean.char <- sapply(clean.char, tolower, USE.NAMES = F)
 writeLines(characters, "les_rois_maudits/characters/characters1_clean.txt")
 writeLines(clean.char, "les_rois_maudits/characters/characters1_clean_lowercase.txt")
 
-## Replace name in book
+#######################################################################
+####                 Seperate duplicated firstname                 ####
+#######################################################################
+# Important characters with duplicated firstname, very difficult to seperate 
+# -> seperate after all the other names have been transformed to lower case
+# Transform name in character lists to lowercase
 for (i in 1:length(characters)){
   book <- unlist(str_replace_all(book, characters[i], clean.char[i]))
 }
 
+## Seperate Louis
+#  unimportant character
+book <-  unlist(str_replace_all(book, "Saint Louis", "stlouis"))
+small <- c(which(str_detect(book, "Louis de")==TRUE), 
+           which(str_detect(book, "Louis la")==TRUE), 
+           which(str_detect(book, "Louis le")==TRUE))
+all <- which(str_detect(book, "Louis")==TRUE)
+louisv <- all [! all %in% small]
+book[louisv] <-  unlist(str_replace_all(book[louisv], "Louis", "louisv"))
+
+## Seperate Guillaume
+# change Guillaume du bois
+book <-  unlist(str_replace_all(book, "Guillaume Dubois", "gdubois"))
+# duc Guillaume -> guillaumedaquitaine
+book <-  unlist(str_replace_all(book, "duc Guillaume", "duc guillaumedaquitaine"))
+# replacer the others with guillaumedenogaret
+book <-  unlist(str_replace_all(book, "Guillaume", "guillaumedenogaret"))
+
+## Seperate d'Aunay
+book <-  unlist(str_replace_all(book, "d'Aunay-", "Aunay"))
+brothers <- c(which(str_detect(book, "[xs] d'Aunay")==TRUE))
+book[brothers] <-  unlist(str_replace_all(book[brothers], "d'Aunay", "gautierdaunay philippedaunay"))
+
+## Seperate Marigny
+
+## Seperate Philippe
+
+
+## Save book
 dir.create("les_rois_maudits/final_txt/", showWarnings = FALSE) 
 writeLines(book, "les_rois_maudits/final_txt/[Rois Maudits-1] Le Roi de fer - Druon,Maurice.txt")
-
-
-#unlist(str_extract_all(book, "le roi [^A-Z]"))
-

@@ -19,13 +19,9 @@ if __name__ == "__main__":
 
     os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
 
-    delete_accents("Stop-words-french.txt", "Stop-words-french-utf8.txt")
-"""
     SOURCE = "les_rois_maudits/txt/"
     TARGET = "les_rois_maudits/txt_woaccents/"
 
     list_files = os.listdir(SOURCE)
     for file in list_files:
         delete_accents(SOURCE+file, TARGET+file)
-
-"""
