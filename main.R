@@ -21,11 +21,14 @@ library(networkD3)
 library(devtools)
 install_github("mukul13/rword2vec")
 library(rword2vec)
+install_github("bmschmidt/wordVectors")
+library(wordVectors)
 ls("package:rword2vec")
 
 #### Books (cut) ####
 # path to txt files containnig the books (without bibliography at the end)
 bookpath = "les_rois_maudits/txt_processed_name/"
+final_bookpath = "les_rois_maudits/final_txt/"
 txtbook1 = "[Rois Maudits-1] Le Roi de fer - Druon,Maurice.txt"
 txtbook2 = "[Rois Maudits-2] La Reine etranglee - Druon,Maurice.txt"
 txtbook3 = "[Rois Maudits-3] Les Poisons de la couro - Druon,Maurice.txt"
@@ -47,7 +50,9 @@ source("preprocessing.R")
 stopwords_fr_path <- "Stop-words-french-utf8.txt"
 stopwords_fr <- readLines(stopwords_fr_path)
 book1 <- prepare.text(file.path(bookpath,txtbook1),stopwords_fr)
-writeLines(book1, file.path())
+# saving book1 entirely prepared
+dir.create(final_bookpath,showWarnings = F)
+writeLines(book1, file.path(final_bookpath,txtbook1))
 
 book1.corpus <- VCorpus(VectorSource(book1))
 
@@ -59,3 +64,44 @@ characters.vector.book1 <- getCharactersVector(file.path(character_path, "charac
 getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.05)
 m.disp <- getTopicsModelling(book1, stopwords_fr_path, 20)
 getNetworkWithLDA(m.disp, characters.vector.book1)
+
+
+#test on word2vec
+# model=word2vec(train_file = file.path(final_bookpath,txtbook1),output_file = "vec.bin",binary=1)
+# dist=distance(file_name = "vec.bin",search_word = "philippedaunay",num = 20)
+# ana=word_analogy(
+#   file_name = "vec.bin",
+#   search_words = "philippedaunay gautierdaunay margueritedebourgogne",
+#   num = 20)
+# 
+# ana=word_analogy(
+#   file_name = "vec.bin",
+#   search_words = "philippedaunay gautierdaunay charlesdevalois",
+#   num = 20)
+# 
+# ana=word_analogy(
+#   file_name = "vec.bin",
+#   search_words = "margueritedebourgogne louisv jeannedebourgogne",
+#   num = 20)
+# 
+# ana=word_analogy(
+#   file_name = "vec.bin",
+#   search_words = "margueritedebourgogne louisv isabelle",
+#   num = 20)
+# 
+# ana=word_analogy(
+#   file_name = "vec.bin",
+#   search_words = "isabelle edouardiii philippeiv",
+#   num = 20)
+# ana=word_analogy(
+#   file_name = "vec.bin",
+#   search_words = "louisv louisdevreux robertdartois",
+#   num = 20)
+
+
+
+model = train_word2vec(file.path(final_bookpath,txtbook1),output="word2vec.bin",threads = 3,vectors = 100,window=12)
+nearest_to(model,model[["philippeiv"]])
+
+philippeiv = nearest_to(model,model[[c("philippeiv")]],50)
+plot(filter_to_rownames(model,names(philippeiv)))
