@@ -18,7 +18,7 @@ library(stringr)
 
 #### Books (cut) ####
 # path to txt files containnig the books (without bibliography at the end)
-bookpath = "les_rois_maudits/txt_cut"
+bookpath = "les_rois_maudits/final_txt"
 txtbook1 = "[Rois Maudits-1] Le Roi de fer - Druon,Maurice.txt"
 txtbook2 = "[Rois Maudits-2] La Reine etranglee - Druon,Maurice.txt"
 txtbook3 = "[Rois Maudits-3] Les Poisons de la couro - Druon,Maurice.txt"

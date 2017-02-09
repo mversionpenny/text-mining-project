@@ -171,6 +171,9 @@ book <- unlist(str_replace_all(book, "Spinello Tolomei|Spinello|Tolomei", "Spine
 ## Thierry -> Thierry d'Hirson
 book <- unlist(str_replace_all(book, "Thierry", "Thierry d'Hirson"))
 
+## reine d'Angleterre -> reine Isabelle
+book <- unlist(str_replace_all(book, "reine d'Angleterre", "reine Isabelle"))
+
 ## 'le roi' without name after (Edouard, Louis or Philippe) -> Philipple IV
 leroi <- c(which(str_detect(book, "le roi [^[A-Z]]")==TRUE), which(str_detect(book, "le roi[:punct:]")==TRUE))
 book[leroi] <- unlist(str_replace_all(book[leroi], "le roi", "Philippe IV"))
@@ -183,8 +186,14 @@ father <- edouard [! edouard %in% son]
 book[father] <- unlist(str_replace_all(book[father], "Edouard II|Edouard", "Edouard II"))
 characters <- c(characters, 'Edouard III')
 
-## reine d'Angleterre -> reine Isabelle
-book <- unlist(str_replace_all(book, "reine d'Angleterre", "reine Isabelle"))
+## Seperate Pierre
+latille <- c(5382, 5554)
+cressay <- which(str_detect(book, "Pierre et Jean")==TRUE)
+cressay <- c(cressay, 5132)
+book[latille] <- unlist(str_replace_all(book[latille], "Pierre", "Pierre de Latille"))
+book[cressay] <- unlist(str_replace_all(book[cressay], "Pierre", "Pierre de Cressay"))
+# Pierre de Cressay was deleted because it appeared only once, but now need to be readded
+characters <- c(characters, "Pierre de Cressay")
 
 #######################################################################
 ####                  Final save                                   ####
