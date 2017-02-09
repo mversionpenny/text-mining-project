@@ -1,3 +1,4 @@
+rm(list=ls())
 this.dir <- dirname(rstudioapi::getActiveDocumentContext()$path)
 setwd(this.dir)
 
@@ -11,7 +12,8 @@ source("projet.R")
 Sys.setenv(JAVA_HOME='C:\\Program Files\\Java\\jre1.8.0_111')
 
 
-lda.id <- 1:length(book)
+lda.id <- 1:length(book1) # todo: gt var?
+
 
 # setting the delimiters
 token.regexp <- "\\p{L}[\\p{L}\\p{P}]+\\p{L}"
@@ -21,7 +23,7 @@ stoplist <- "./Stop-words-french-utf8.txt"
 #stoplist <- stopwords("french")
   
 # including stopwords
-mallet.instances <- mallet.import(as.character(lda.id), book, stoplist, token.regexp = token.regexp)
+mallet.instances <- mallet.import(as.character(lda.id), book1, stoplist, token.regexp = token.regexp)
 #mallet.instances <- mallet.import(as.character(lda.id), book, "data/empty.txt", token.regexp = token.regexp)
 
 # Estimation of LDA parameters
@@ -59,7 +61,7 @@ doc.topics <- mallet.doc.topics(topic.model, smoothed=T, normalized=T)
 # topics x words matrix
 topic.words <- mallet.topic.words(topic.model, smoothed=T, normalized=T)
 
-topic.todisp <- 1:40
+topic.todisp <- 1:30
 m.disp <- do.call(cbind,
                   sapply(topic.todisp,
                          function(x) format(mallet.top.words(topic.model, topic.words[x,]))))
@@ -117,37 +119,35 @@ sprintf("%.3f",sort(pz.ch, decreasing=T)[1:10])
 
 mallet.top.words(topic.model, topic.words[9,])
 
-getNetworkWithAssocs <- function(tdm, characters.list, characters.vector){
+getNetworkWithAssocs <- function(tdm, characters.vector){
   
   nodes <- data.frame(name = characters.vector, group=rep(1,length(characters.vector)))
   vec1 <- c()
   vec2 <- c()
   vec3 <- c()
   
-  for(j in 1:(length(characters.list)-1)){
-    lengthJ <- length(characters.list[[j]])
-    character <- characters.list[[j]][1]
-    assocs <- sapply(names(unlist(findAssocs(tdm, character, 0.15))), 
+  for(j in 1:(length(characters.vector)-1)){
+    character <- characters.vector[j]
+    assocs <- sapply(names(unlist(findAssocs(tdm, character, 0.05))), 
                      function(x) return(gsub(paste(character,".", sep=""), "", x)))
-    if(lengthJ==1) resultJ <- 1
-    else resultJ <- length(which(characters.list[[j]] %in% assocs))
     
-    if(resultJ >= lengthJ/2){
-      for(k in (j+1):length(characters.list)){
-        lengthK <- length(characters.list[[k]])
-        resultK <- length(which(characters.list[[k]] %in% assocs))
-        if(resultK > lengthK/2){
-          vec1 <- c(vec1,(j-1))
-          vec2 <- c(vec2,(k-1))
-          vec3 <- c(vec3,1)
-        }
-        
+    
+    for(k in (j+1):length(characters.vector)){
+      if (characters.vector[k] %in% assocs){
+        vec1 <- c(vec1,(j-1))
+        vec2 <- c(vec2,(k-1))
+        vec3 <- c(vec3,1)
       }
+        
+
     }
   }
+
   
   links <- data.frame(source=vec1, target=vec2, value=vec3)
   
+  # print(vec1)
+  # print(vec2)
   # forceNetwork(Links = links, Nodes = nodes,
   #              Source = "source", Target = "target",
   #              Value = "value", NodeID = "name",
@@ -158,7 +158,7 @@ getNetworkWithAssocs <- function(tdm, characters.list, characters.vector){
                   units = "m", fontSize = 12, nodeWidth = 30)
 }
 
-getNetworkWithLDA <- function(m.disp, characters.list, characters.vector){
+getNetworkWithLDA <- function(m.disp, characters.vector){
   nodes <- data.frame(name = characters.vector, group=rep(1,length(characters.vector)))
   vec1 <- c()
   vec2 <- c()
@@ -168,25 +168,26 @@ getNetworkWithLDA <- function(m.disp, characters.list, characters.vector){
   nb.topics <- ncol(m.disp)
   nb.words <- nrow(m.disp)
   while(i < nb.topics) {
-    for(j in 1:(length(characters.list)-1)){
-      lengthJ <- length(characters.list[[j]])
-      resultJ <- length(which(characters.list[[j]] %in% m.disp[,i]))
-      if(resultJ >= lengthJ/2){
-        for(k in (j+1):length(characters.list)){
-          lengthK <- length(characters.list[[k]])
+    for(j in 1:(length(characters.vector)-1)){
+      
+
+        for(k in (j+1):length(characters.vector)){
           
-          resultK <- length(which(characters.list[[k]] %in% m.disp[,i]))
-          if(resultK >= lengthK/2){
+          
+          if(characters.vector[k] %in% m.disp[,i]){
             vec1 <- c(vec1,(j-1))
             vec2 <- c(vec2,(k-1))
             vec3 <- c(vec3,1)
           }
-
+             
+                
         }
-      }
     }
+  
+
     i <- i + 2
   }
+
   
   links <- data.frame(source=vec1, target=vec2, value=vec3)
 
@@ -201,6 +202,7 @@ getNetworkWithLDA <- function(m.disp, characters.list, characters.vector){
 
   
 }
+
 
 
 

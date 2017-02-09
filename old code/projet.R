@@ -73,25 +73,11 @@ colors <- brewer.pal(4,"Paired")
 wordcloud(names(sorted[1:20]), sorted[1:20], colors=colors)
 
 
-getCharactersList <- function(file_name){
-  file <- readLines(file_name, encoding = "UTF-8")
-  characters.list <- vector("list", length(file))
-  for(i in 1:length(file)){
-    char = tolower(file[i]) # unlist(strsplit("Charles d'Artois", split="de "))
-    char = unlist(strsplit(char, split=" de "))
-    char = unlist(strsplit(char, split=" d'"))
-    char = unlist(strsplit(char, split=" "))
-    characters.list[[i]] <- char
-  }
-  return(characters.list)
-}
-
 getCharactersVector <- function(file_name){
   file <- readLines(file_name, encoding = "UTF-8")
   characters.vector <- rep("", length(file))
   for(i in 1:length(file)){
-    char = tolower(file[i]) # unlist(strsplit("Charles d'Artois", split="de "))
-    characters.vector[i] <- char
+    characters.vector[i] <- file[i]
   }
   return(characters.vector)
 }
@@ -201,13 +187,13 @@ firstNetwork <- function(tdm, characters.list, characters.vector){
   }
   links <- data.frame(source=vec1, target=vec2, value=vec3)
     
-  forceNetwork(Links = links, Nodes = nodes,
-                 Source = "source", Target = "target",
-                 Value = "value", NodeID = "name",
-                 Group = "group", opacity = 0.8)
+  # forceNetwork(Links = links, Nodes = nodes,
+  #                Source = "source", Target = "target",
+  #                Value = "value", NodeID = "name",
+  #                Group = "group", opacity = 0.8)
     
-  # sankeyNetwork(Links = links, Nodes = nodes, Source = "source",
-  #                 Target = "target", Value = "value", NodeID = "name",
-  #                 units = "m", fontSize = 12, nodeWidth = 30)
+  sankeyNetwork(Links = links, Nodes = nodes, Source = "source",
+                  Target = "target", Value = "value", NodeID = "name",
+                  units = "m", fontSize = 12, nodeWidth = 30)
 }
 
