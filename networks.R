@@ -41,6 +41,10 @@ getTopicsModelling <- function(book, stoplist, k){
   return(m.disp)
 }
 
+getWord2Vec <- function(text){
+  return(0)
+}
+
 getNetworkWithAssocs <- function(tdm, characters.vector, cor, sankey=T){
   nodes <- 
     data.frame(name = characters.vector, group=rep(1,length(characters.vector)))
