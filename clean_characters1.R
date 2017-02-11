@@ -71,8 +71,8 @@ book <- unlist(str_replace_all(book, "Beatrice d'Hirson|Beatrice", "Beatrice d'H
 book <- unlist(str_replace_all(book, "Blanche de Bourgogne|Blanche", "Blanche de Bourgogne"))
 characters <- unlist(str_replace_all(characters, "Blanche", "Blanche de Bourgogne"))
 
-## Replace Boniface with Boniface VVV
-book <- unlist(str_replace_all(book, "Boniface VIII|Boniface", "Boniface VIII"))
+## Replace pape Boniface with Boniface VII (unimportant character -> delete pape to isolate pape Clement)
+book <- unlist(str_replace_all(book, "pape Boniface VIII|pape Boniface|Boniface VIII|Boniface", "Boniface VIII"))
 
 ## Replace 'de Valois', 'Valois' with Charles de Valois, remove Monseigneur de Valois, Valois, de Valois
 book <- unlist(str_replace_all(book, "Charles de Valois|de Valois|Valois", "Charles de Valois"))
@@ -105,7 +105,7 @@ book <- unlist(str_replace_all(book, "Hugues de Bouville|de Bouville|Bouville", 
 book <- unlist(str_replace_all(book, "Jacques de Molay|de Molay|Molay|Jacques", "Jacques de Molay"))
 
 ## Jeanne -> Jeanne de Bourgogne
-book <- unlist(str_replace_all(book, "Jeanne de Bourgogne|Jeanne", "Jeanne de Bourgogne"))
+book <- unlist(str_replace_all(book, "Jeanne de Bourgogne|Jeanne de Poitiers|Jeanne", "Jeanne de Bourgogne"))
 characters <- unlist(str_replace_all(characters, "Jeanne", "Jeanne de Bourgogne"))
 
 ## Hutin, Louis Hutin, Louis de Navarre -> Louis V
@@ -138,9 +138,10 @@ rm.indx.extra <- c(rm.indx.extra, 61, 64, 65, 67:69, 71:74)
 
 ## Character Pape Clement -> Clement
 characters <- unlist(str_replace_all(characters, "Pape Clement", "Clement"))
+book <- unlist(str_replace_all(book, "[Pp]ape Clement|[Pp]ape|Clement", "pape Clement"))
 
 ## Philippe le Bel, Philippe quatrieme -> Philippe IV
-book <- unlist(str_replace_all(book, "Philippe le Bel|Philippe quatrieme", "Philippe IV"))
+book <- unlist(str_replace_all(book, "Philippe IV|Philippe le Bel|Philippe quatrieme", "Philippe IV"))
 characters <- unlist(str_replace_all(characters, "Philippe le Bel", "Philippe IV"))
 
 
@@ -170,14 +171,14 @@ rm.indx.extra <- c(rm.indx.extra, 62, 63, 103)
 book <- unlist(str_replace_all(book, "Spinello Tolomei|Spinello|Tolomei", "Spinello Tolomei"))
 
 ## Thierry -> Thierry d'Hirson
-book <- unlist(str_replace_all(book, "Thierry", "Thierry d'Hirson"))
+book <- unlist(str_replace_all(book, "Thierry d'Hirson|Thierry", "Thierry d'Hirson"))
 
 ## reine d'Angleterre -> reine Isabelle
 book <- unlist(str_replace_all(book, "reine d'Angleterre", "reine Isabelle"))
 
-## 'le roi' without name after (Edouard, Louis or Philippe) -> Philipple IV
-leroi <- c(which(str_detect(book, "le roi [^[A-Z]]")==TRUE), which(str_detect(book, "le roi[:punct:]")==TRUE))
-book[leroi] <- unlist(str_replace_all(book[leroi], "le roi", "Philippe IV"))
+## 'roi' without name after (Edouard, Louis or Philippe) -> Philipple IV
+roi <- c(which(str_detect(book, " roi [^[A-Z]]")==TRUE), which(str_detect(book, " roi[:punct:]")==TRUE))
+book[roi] <- unlist(str_replace_all(book[roi], " roi", " roi Philippe IV"))
 
 ## Seperate Edouard
 edouard <- which(str_detect(book, "Edouard")==TRUE)
@@ -239,13 +240,38 @@ book <-  unlist(str_replace_all(book, "Guillaume", "guillaumedenogaret"))
 book <-  unlist(str_replace_all(book, "d'Aunay-", "Aunay"))
 brothers <- c(which(str_detect(book, "[xs] d'Aunay")==TRUE))
 book[brothers] <-  unlist(str_replace_all(book[brothers], "d'Aunay", "gautierdaunay philippedaunay"))
+phil <- c(which(str_detect(book, "d'Aunay")==TRUE))
+book[phil] <-  unlist(str_replace_all(book[phil], "d'Aunay", "philippedaunay"))
 
 ## Seperate Marigny
+deux <- c(5001, 5092)
+jm <- c(996, 4995) 
+book[deux] <-  unlist(str_replace_all(book[deux], "Marigny", "jeandemarigny enguerranddemarigny"))
+book[jm] <-  unlist(str_replace_all(book[jm], "Marigny", "jeandemarigny"))
+book <-  unlist(str_replace_all(book, "Marigny|coadjuteur", "enguerranddemarigny"))
 
 ## Seperate Philippe
+book <-  unlist(str_replace_all(book, "[rR]oi Philippe", "roi philippeiv"))
+none <- 4542
+iv <- c(149, 763, 1848, 2876)
+poitiers <- c(3051, 3059, 245, 3578, 3668, 3672, 3882, 3936)
+all <- which(str_detect(book, "Philippe")==TRUE)
+aunay <- all [! all %in% c(none,iv,poitiers)]
+book[iv] <-  unlist(str_replace_all(book[iv], "Philippe", "philippeiv"))
+book[poitiers] <-  unlist(str_replace_all(book[poitiers], "Philippe", "philippedepoitiers"))
+book[aunay] <-  unlist(str_replace_all(book[aunay], "Philippe", "philippedaunay"))
+
+
+## Seperate de Poitiers
+jeanne <- 1155
+phil <- c(1979, 3067, 3176)
+book[jeanne] <-  unlist(str_replace_all(book[jeanne], "Poitiers", "jeannedebourgogne"))
+book[phil] <-  unlist(str_replace_all(book[phil], "Poitiers", "philippedepoitiers"))
+
 #######################################################################
-####                 Save list characters                          ####
+####                 Save files                                    ####
 #######################################################################
+## Save list characters
 writeLines(characters, "les_rois_maudits/characters/characters1_clean.txt")
 writeLines(clean.char, "les_rois_maudits/characters/characters1_clean_lowercase.txt")
 ## Save book
