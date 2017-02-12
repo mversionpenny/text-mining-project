@@ -1,5 +1,6 @@
 library(rJava)
 library(mallet)
+library(XML)
 
 getCharactersVector <- function(file_name){
   file <- readLines(file_name, encoding = "UTF-8")
@@ -28,8 +29,8 @@ getTopicsModelling <- function(book, stoplist, k){
   topic.model$loadDocuments(mallet.instances)
 
   # train the model
-  topic.model$train(1000)
-  topic.model$maximize(10)
+  topic.model$train(1500)
+  topic.model$maximize(15)
   # topics x words matrix
   topic.words <- mallet.topic.words(topic.model, smoothed=T, normalized=T)
   
@@ -95,11 +96,13 @@ getNetworkWithLDA <- function(m.disp, characters.vector, sankey=T){
   nb.words <- nrow(m.disp)
   while(i < nb.topics) {
     for(j in 1:(length(characters.vector)-1)){
-      for(k in (j+1):length(characters.vector)){
-        if(characters.vector[k] %in% m.disp[,i]){
-          vec1 <- c(vec1,(j-1))
-          vec2 <- c(vec2,(k-1))
-          vec3 <- c(vec3,1)
+      if(characters.vector[j] %in% m.disp[,i]){
+        for(k in (j+1):length(characters.vector)){
+          if(characters.vector[k] %in% m.disp[,i]){
+            vec1 <- c(vec1,(j-1))
+            vec2 <- c(vec2,(k-1))
+            vec3 <- c(vec3,1)
+          }
         }
       }
     }
@@ -119,5 +122,43 @@ getNetworkWithLDA <- function(m.disp, characters.vector, sankey=T){
                  Source = "source", Target = "target",
                  Value = "value", NodeID = "name",
                  Group = "group", opacity = 0.8))
+  }
+}
+
+getNetworkWithWord2Vec <- function(word2vecFile, characters.vector, dist=20, sankey=T){
+  nodes <- 
+    data.frame(name = characters.vector, group=rep(1,length(characters.vector)))
+  vec1 <- c()
+  vec2 <- c()
+  vec3 <- c()
+  
+
+  for(j in 1:(length(characters.vector)-1)){
+    character <- characters.vector[j]
+    nearest=distance(file_name = "vec.bin",search_word = character,num = dist)
+    for(k in (j+1):length(characters.vector)){
+      if(characters.vector[k] %in% nearest$word){
+        vec1 <- c(vec1,(j-1))
+        vec2 <- c(vec2,(k-1))
+        vec3 <- c(vec3,1)
+      }
+    }
+      
+  }
+
+  
+  links <- data.frame(source=vec1, target=vec2, value=vec3)
+  
+  
+  if(sankey==T){
+    return(sankeyNetwork(Links = links, Nodes = nodes, Source = "source",
+                         Target = "target", Value = "value", NodeID = "name",
+                         units = "m", fontSize = 12, nodeWidth = 30))
+  }
+  else{
+    return(forceNetwork(Links = links, Nodes = nodes,
+                        Source = "source", Target = "target",
+                        Value = "value", NodeID = "name",
+                        Group = "group", opacity = 0.8))
   }
 }

@@ -4,7 +4,8 @@
 #### Setting environnement ####
 # install missing packages
 list.of.packages <- c("rstudioapi", "RColorBrewer", "dplyr", "tm", "NLP", 
-                      "wordcloud", "stringr","networkD3","rJava", "mallet", "word2vec")
+                      "wordcloud", "stringr","networkD3","rJava", "mallet", 
+                      "word2vec", "XML", "devtools")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos = "http://cran.rstudio.com/")
 
@@ -21,8 +22,8 @@ library(networkD3)
 library(devtools)
 install_github("mukul13/rword2vec")
 library(rword2vec)
-install_github("bmschmidt/wordVectors")
-library(wordVectors)
+# install_github("bmschmidt/wordVectors")
+# library(wordVectors)
 ls("package:rword2vec")
 
 #### Books (cut) ####
@@ -62,36 +63,34 @@ book1.tdm <- TermDocumentMatrix(book1.corpus, control=list(wordLengths=c(2,Inf))
 source("networks.R")
 characters.vector.book1 <- getCharactersVector(file.path(character_path, "characters1_clean_lowercase.txt"))
 getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.05)
-m.disp <- getTopicsModelling(book1, stopwords_fr_path, 20)
-getNetworkWithLDA(m.disp, characters.vector.book1)
+getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.15)
+m.disp <- getTopicsModelling(book1, stopwords_fr_path, 30)
+getNetworkWithLDA(m.disp, characters.vector.book1, sankey=T)
 
+# do not run if you want the same result as us
+model=word2vec(train_file = file.path(final_bookpath,txtbook1),output_file = "vec.bin",binary=1)
+getNetworkWithWord2Vec("vec.bin", characters.vector.book1, dist = 25)
 
-#test on word2vec
-# model=word2vec(train_file = file.path(final_bookpath,txtbook1),output_file = "vec.bin",binary=1)
-# dist=distance(file_name = "vec.bin",search_word = "philippedaunay",num = 20)
-# ana=word_analogy(
-#   file_name = "vec.bin",
-#   search_words = "philippedaunay gautierdaunay margueritedebourgogne",
-#   num = 20)
+# test on word2vec
+# dist=distance(file_name = "vec.bin",search_word = "aime",num = 20)
 # 
+ana=word_analogy(
+  file_name = "vec.bin",
+  search_words = "margueritedebourgogne philippedaunay blanchedebourgogne",
+  num = 20)
+
+ana=word_analogy(
+  file_name = "vec.bin",
+  search_words = "philippeiv charlesdevalois blanchedebourgogne",
+  num = 20)
+
+ana=word_analogy(
+  file_name = "vec.bin",
+  search_words = "robertdartois mahautdebourgogne charlesdevalois",
+  num = 20)
 # ana=word_analogy(
 #   file_name = "vec.bin",
-#   search_words = "philippedaunay gautierdaunay charlesdevalois",
-#   num = 20)
-# 
-# ana=word_analogy(
-#   file_name = "vec.bin",
-#   search_words = "margueritedebourgogne louisv jeannedebourgogne",
-#   num = 20)
-# 
-# ana=word_analogy(
-#   file_name = "vec.bin",
-#   search_words = "margueritedebourgogne louisv isabelle",
-#   num = 20)
-# 
-# ana=word_analogy(
-#   file_name = "vec.bin",
-#   search_words = "isabelle edouardiii philippeiv",
+#   search_words = "jeannedebourgogne margueritedebourgogne philippedaunay",
 #   num = 20)
 # ana=word_analogy(
 #   file_name = "vec.bin",
@@ -99,9 +98,3 @@ getNetworkWithLDA(m.disp, characters.vector.book1)
 #   num = 20)
 
 
-
-model = train_word2vec(file.path(final_bookpath,txtbook1),output="word2vec.bin",threads = 3,vectors = 100,window=12)
-nearest_to(model,model[["philippeiv"]])
-
-philippeiv = nearest_to(model,model[[c("philippeiv")]],50)
-plot(filter_to_rownames(model,names(philippeiv)))
