@@ -77,7 +77,7 @@ co.oc.low <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.05)
 co.oc.low.igraph <- 
   getIgraph(co.oc.low$x$links$source, co.oc.low$x$links$target, 
             co.oc.low$x$links$value, characters.vector.book1)
-tkplot(co.oc.low.igraph, vertex.color="gold", vertex.shape="circle", vertex.size=12, 
+tkplot(co.oc.low.igraph, vertex.color="lightblue", vertex.shape="circle", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
 
@@ -85,7 +85,7 @@ co.oc.high <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.15)
 co.oc.high.igraph <- 
   getIgraph(co.oc.high$x$links$source, co.oc.high$x$links$target, 
             co.oc.high$x$links$value, characters.vector.book1)
-tkplot(co.oc.high.igraph, vertex.color="gold", vertex.shape="circle", vertex.size=12, 
+tkplot(co.oc.high.igraph, vertex.color="lightblue", vertex.shape="circle", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
 
@@ -95,7 +95,7 @@ lda1 <- getNetworkWithLDA(m.disp1, characters.vector.book1, sankey=T)
 lda.igraph.1 <- 
   getIgraph(lda1$x$links$source, lda1$x$links$target, 
             lda1$x$links$value, characters.vector.book1)
-tkplot(lda.igraph.1, vertex.color="gold", vertex.shape="sphere", vertex.size=12, 
+tkplot(lda.igraph.1, vertex.color="lightblue", vertex.shape="sphere", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
 
@@ -104,7 +104,7 @@ lda2 <- getNetworkWithLDA(m.disp2, characters.vector.book1, sankey=T)
 lda.igraph.2 <- 
   getIgraph(lda2$x$links$source, lda2$x$links$target, 
             lda2$x$links$value, characters.vector.book1)
-tkplot(lda.igraph.2, vertex.color="gold", vertex.shape="sphere", vertex.size=12, 
+tkplot(lda.igraph.2, vertex.color="lightblue", vertex.shape="sphere", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
 
@@ -116,7 +116,7 @@ w2v <- getNetworkWithWord2Vec("vec.bin", characters.vector.book1, dist = 25)
 w2v.igraph <- 
   getIgraph(w2v$x$links$source, w2v$x$links$target, 
             w2v$x$links$value, characters.vector.book1)
-tkplot(w2v.igraph, vertex.color="gold", vertex.shape="sphere", vertex.size=12, 
+tkplot(w2v.igraph, vertex.color="lightblue", vertex.shape="sphere", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
 
@@ -147,11 +147,11 @@ ana.5 <- word_analogy(
 
 library(ggplot2)
 library(network)
-ggnet(lda.igraph.1,label=T)
+ggnet2(w2v.igraph, color = "phono", palette = "Set1",edge.color = c( "grey50"),label=T)
 
 hs <- hub_score(lda.igraph.1, weights=NA)$vector
 plot(lda.igraph.1, vertex.size=hs*10, main="Hubs")
 as <- authority_score(lda.igraph.1, weights=NA)$vector
-tkplot(lda.igraph.1, vertex.color="lightblue", vertex.shape="sphere", vertex.size=as*20, 
+tkplot(w2v.igraph, vertex.color="lightblue", vertex.shape="sphere", vertex.size=as*20, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
