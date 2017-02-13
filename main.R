@@ -5,7 +5,8 @@
 # install missing packages
 list.of.packages <- c("rstudioapi", "RColorBrewer", "dplyr", "tm", "NLP", 
                       "wordcloud", "stringr","networkD3","rJava", "mallet", 
-                      "word2vec", "XML", "devtools", "statnet")
+                      "word2vec", "XML", "devtools", "statnet","igraph",
+                      "intergraph")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos = "http://cran.rstudio.com/")
 
@@ -18,11 +19,16 @@ rm(list=ls())
 library(stringr)
 library(networkD3)
 library(statnet)
+library(igraph)
+library(intergraph)
 
 # TODO : how to force???
 library(devtools)
 install_github("mukul13/rword2vec")
 library(rword2vec)
+
+install.packages("GGally")
+library(GGally)
 # install_github("bmschmidt/wordVectors")
 # library(wordVectors)
 # ls("package:rword2vec")
@@ -68,17 +74,17 @@ characters.vector.book1 <-
 
 ##### Get network with co-occurences ####
 co.oc.low <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.05)
-co.oc.high <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.15)
 co.oc.low.igraph <- 
   getIgraph(co.oc.low$x$links$source, co.oc.low$x$links$target, 
             co.oc.low$x$links$value, characters.vector.book1)
-co.oc.high.igraph <- 
-  getIgraph(co.oc.high$x$links$source, co.oc.high$x$links$target, 
-            co.oc.high$x$links$value, characters.vector.book1)
-
 tkplot(co.oc.low.igraph, vertex.color="gold", vertex.shape="circle", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
+
+co.oc.high <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.15)
+co.oc.high.igraph <- 
+  getIgraph(co.oc.high$x$links$source, co.oc.high$x$links$target, 
+            co.oc.high$x$links$value, characters.vector.book1)
 tkplot(co.oc.high.igraph, vertex.color="gold", vertex.shape="circle", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
@@ -139,8 +145,13 @@ ana.5 <- word_analogy(
   search_words = "mahautdebourgogne robertdartois gucciobaglioni",
   num = 20)
 
+library(ggplot2)
+library(network)
+ggnet(lda.igraph.1,label=T)
 
-hs <- hub_score(test, weights=NA)$vector
-plot(test, vertex.size=hs*10, main="Hubs")
-as <- authority_score(test, weights=NA)$vector
-plot(test, vertex.size=as*30, main="Authorities")
+hs <- hub_score(lda.igraph.1, weights=NA)$vector
+plot(lda.igraph.1, vertex.size=hs*10, main="Hubs")
+as <- authority_score(lda.igraph.1, weights=NA)$vector
+tkplot(lda.igraph.1, vertex.color="lightblue", vertex.shape="sphere", vertex.size=as*20, 
+       vertex.frame.color="gray", vertex.label.color="black", 
+       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)

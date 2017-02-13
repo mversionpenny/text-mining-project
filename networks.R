@@ -175,9 +175,28 @@ getNetworkWithLDA <- function(m.disp, characters.vector, sankey=T){
       if(characters.vector[j] %in% m.disp[,i]){
         for(k in (j+1):length(characters.vector)){
           if(characters.vector[k] %in% m.disp[,i]){
-            vec1 <- c(vec1,(j-1))
-            vec2 <- c(vec2,(k-1))
-            vec3 <- c(vec3,1)
+            # we want to check if the relationship has already been counted
+            vec1.test <- which(vec1==(j-1))
+            vec2.test <- which(vec2==(k-1))
+            alreay.rel <- FALSE
+            if(length(vec2.test)>0 && length(vec1.test)>0 ){
+              for(m in 1:length(vec1.test)){
+              
+                if(vec1.test[m] %in% vec2.test){
+                  vec3[vec1.test[m]] <- vec3[vec1.test[m]] + 1
+                  alreay.rel <- TRUE
+                }
+              }
+            }
+            else{
+              alreay.rel<-FALSE
+            }
+            if(!alreay.rel){
+              vec1 <- c(vec1,(j-1))
+              vec2 <- c(vec2,(k-1))
+              vec3 <- c(vec3,1)
+            }
+            
           }
         }
       }
