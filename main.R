@@ -5,7 +5,7 @@
 # install missing packages
 list.of.packages <- c("rstudioapi", "RColorBrewer", "dplyr", "tm", "NLP", 
                       "wordcloud", "stringr","networkD3","rJava", "mallet", 
-                      "word2vec", "XML", "devtools")
+                      "word2vec", "XML", "devtools", "statnet")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos = "http://cran.rstudio.com/")
 
@@ -17,6 +17,7 @@ rm(list=ls())
 # load libraries
 library(stringr)
 library(networkD3)
+library(statnet)
 
 # TODO : how to force???
 library(devtools)
@@ -62,32 +63,59 @@ book1.tdm <- TermDocumentMatrix(book1.corpus, control=list(wordLengths=c(2,Inf))
 
 source("networks.R")
 characters.vector.book1 <- getCharactersVector(file.path(character_path, "characters1_clean_lowercase.txt"))
-getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.05)
-getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.15)
+
+##### Get network with co-occurences ####
+co.oc.low <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.05)
+co.oc.high <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.15)
+co.oc.low.igraph <- 
+  getIgraph(co.oc.low$x$links$source, co.oc.low$x$links$target, 
+            co.oc.low$x$links$value, characters.vector.book1)
+co.oc.high.igraph <- 
+  getIgraph(co.oc.high$x$links$source, co.oc.high$x$links$target, 
+            co.oc.high$x$links$value, characters.vector.book1)
+
+tkplot(co.oc.low.igraph, vertex.color="gold", vertex.shape="sphere", vertex.size=12, 
+       vertex.frame.color="gray", vertex.label.color="black", 
+       vertex.label.cex=0.9, vertex.label.dist=0.5, edge.curved=0.2)
+tkplot(co.oc.high.igraph, vertex.color="gold", vertex.shape="sphere", vertex.size=12, 
+       vertex.frame.color="gray", vertex.label.color="black", 
+       vertex.label.cex=0.9, vertex.label.dist=0.5, edge.curved=0.2)
+
+##### Get network with LDA (topic-modelling) ####
 m.disp <- getTopicsModelling(book1, stopwords_fr_path, 30)
-getNetworkWithLDA(m.disp, characters.vector.book1, sankey=T)
+lda <- getNetworkWithLDA(m.disp, characters.vector.book1, sankey=F)
+lda.igraph <- 
+  getIgraph(lda$x$links$source, lda$x$links$target, 
+            lda$x$links$value, characters.vector.book1)
+tkplot(lda.igraph, vertex.color="gold", vertex.shape="sphere", vertex.size=12, 
+       vertex.frame.color="gray", vertex.label.color="black", 
+       vertex.label.cex=0.9, vertex.label.dist=0.5, edge.curved=0.2)
 
+##### Get network with Word2Vec ####
 # do not run if you want the same result as us
-model=word2vec(train_file = file.path(final_bookpath,txtbook1),output_file = "vec.bin",binary=1)
-getNetworkWithWord2Vec("vec.bin", characters.vector.book1, dist = 25)
-
-# test on word2vec
-# dist=distance(file_name = "vec.bin",search_word = "aime",num = 20)
+# model <-word2vec(train_file = file.path(final_bookpath,txtbook1),
+#                  output_file = "vec.bin",binary=1)
+w2v <- getNetworkWithWord2Vec("vec.bin", characters.vector.book1, dist = 25)
+w2v.igraph <- 
+  getIgraph(w2v$x$links$source, w2v$x$links$target, 
+            w2v$x$links$value, characters.vector.book1)
+tkplot(w2v.igraph, vertex.color="gold", vertex.shape="sphere", vertex.size=12, 
+       vertex.frame.color="gray", vertex.label.color="black", 
+       vertex.label.cex=0.9, vertex.label.dist=0.5, edge.curved=0.2)
+# ana=word_analogy(
+#   file_name = "vec.bin",
+#   search_words = "margueritedebourgogne philippedaunay blanchedebourgogne",
+#   num = 20)
 # 
-ana=word_analogy(
-  file_name = "vec.bin",
-  search_words = "margueritedebourgogne philippedaunay blanchedebourgogne",
-  num = 20)
-
-ana=word_analogy(
-  file_name = "vec.bin",
-  search_words = "philippeiv charlesdevalois blanchedebourgogne",
-  num = 20)
-
-ana=word_analogy(
-  file_name = "vec.bin",
-  search_words = "robertdartois mahautdebourgogne charlesdevalois",
-  num = 20)
+# ana=word_analogy(
+#   file_name = "vec.bin",
+#   search_words = "philippeiv charlesdevalois blanchedebourgogne",
+#   num = 20)
+# 
+# ana=word_analogy(
+#   file_name = "vec.bin",
+#   search_words = "robertdartois mahautdebourgogne charlesdevalois",
+#   num = 20)
 # ana=word_analogy(
 #   file_name = "vec.bin",
 #   search_words = "jeannedebourgogne margueritedebourgogne philippedaunay",
@@ -97,4 +125,17 @@ ana=word_analogy(
 #   search_words = "louisv louisdevreux robertdartois",
 #   num = 20)
 
+### tests igraph ###
 
+
+plot(g, edge.arrow.size=.5, vertex.label.color="black", vertex.label.dist=1.5) 
+
+test <- getIgraph(w2v$x$links$source, w2v$x$links$target, w2v$x$links$value, characters.vector.book1)
+plot(test, edge.arrow.size=.5, vertex.label.color="black", vertex.label.dist=0.5) 
+plot <- tkplot(test, vertex.color="gold", vertex.shape="sphere", vertex.size=12, vertex.frame.color="gray", vertex.label.color="black", vertex.label.cex=0.9, vertex.label.dist=0.5, edge.curved=0.2) 
+
+
+hs <- hub_score(test, weights=NA)$vector
+plot(test, vertex.size=hs*10, main="Hubs")
+as <- authority_score(test, weights=NA)$vector
+plot(test, vertex.size=as*30, main="Authorities")
