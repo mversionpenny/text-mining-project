@@ -4,7 +4,8 @@
 #### Setting environnement ####
 # install missing packages
 list.of.packages <- c("rstudioapi", "RColorBrewer", "dplyr", "tm", "NLP", 
-                      "wordcloud", "stringr","networkD3","rJava", "mallet", "word2vec")
+                      "wordcloud", "stringr","networkD3","rJava", "mallet", 
+                      "word2vec", "devtools")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos = "http://cran.rstudio.com/")
 
