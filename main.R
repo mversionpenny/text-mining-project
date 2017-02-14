@@ -49,15 +49,17 @@ character_path = "les_rois_maudits/characters/"
 
 #### Import modules ####
 source("preprocessing.R")
+source("networks.R")
+
 
 ################################################################################
 ########                           Book1                                ########
 ################################################################################
 
-### Preprocessing and simple visualization
+#### Preprocessing and simple visualization ####
 # path to stopwords :
 stopwords_fr_path <- "Stop-words-french-utf8.txt"
-stopwords_fr <- readLines(stopwords_fr_path)
+stopwords_fr <- readLines(stopwords_fr_path, encoding = "UTF-8")
 book1 <- prepare.text(file.path(bookpath,txtbook1),stopwords_fr)
 # saving book1 entirely prepared
 dir.create(final_bookpath,showWarnings = F)
@@ -65,10 +67,10 @@ writeLines(book1, file.path(final_bookpath,txtbook1))
 
 book1.corpus <- VCorpus(VectorSource(book1))
 
-book1.tdm <- TermDocumentMatrix(book1.corpus, control=list(wordLengths=c(2,Inf)))
+book1.tdm <- TermDocumentMatrix(book1.corpus, control=list(wordLengths=c(3,Inf)))
 
+simple.visu(book1.tdm)
 
-source("networks.R")
 characters.vector.book1 <- 
   getCharactersVector(file.path(character_path, "characters1_clean_lowercase.txt"))
 
