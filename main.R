@@ -78,7 +78,7 @@ co.oc.low.igraph <-
 tkplot(co.oc.low.igraph, vertex.color="lightblue", vertex.shape="circle", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
-       vertex.label = character.labels, canvas.width = 700, canvas.height = 700)
+       canvas.width = 700, canvas.height = 700)
 
 co.oc.high <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.15)
 co.oc.high.igraph <- 
@@ -87,10 +87,13 @@ co.oc.high.igraph <-
 tkplot(co.oc.high.igraph, vertex.color="lightblue", vertex.shape="circle", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
-       vertex.label = character.labels, canvas.width = 700, canvas.height = 700)
+       canvas.width = 700, canvas.height = 700)
 
 ##### Get network with LDA (topic-modelling) ####
-m.disp1 <- getTopicsModelling(book1, stopwords_fr_path, 30)
+# Do not run if you want the same results as us
+# m.disp1 <- getTopicsModelling(book1, stopwords_fr_path, 30)
+# save(m.disp1, file = "m.disp1.RData")
+load("m.disp1.RData")
 lda1 <- getNetworkWithLDA(m.disp1, characters.vector.book1, sankey=T)
 lda.igraph.1 <- 
   getIgraph(lda1$x$links$source, lda1$x$links$target, 
@@ -98,9 +101,12 @@ lda.igraph.1 <-
 tkplot(lda.igraph.1, vertex.color="lightblue", vertex.shape="sphere", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
-       vertex.label = character.labels, canvas.width = 700, canvas.height = 700)
+       canvas.width = 700, canvas.height = 700)
 
-m.disp2 <- getTopicsModelling(book1, stopwords_fr_path, 200)
+# Do not run if you want the same results as us
+# m.disp2 <- getTopicsModelling(book1, stopwords_fr_path, 200)
+# save(m.disp2, file = "m.disp2.RData")
+load("m.disp2.RData")
 lda2 <- getNetworkWithLDA(m.disp2, characters.vector.book1, sankey=T)
 lda.igraph.2 <- 
   getIgraph(lda2$x$links$source, lda2$x$links$target, 
@@ -108,7 +114,7 @@ lda.igraph.2 <-
 tkplot(lda.igraph.2, vertex.color="lightblue", vertex.shape="sphere", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
-       vertex.label = character.labels, canvas.width = 700, canvas.height = 700)
+       canvas.width = 700, canvas.height = 700)
 
 ##### Get network with Word2Vec ####
 # do not run if you want the same result as us
@@ -121,33 +127,33 @@ w2v.igraph <-
 tkplot(w2v.igraph, vertex.color="lightblue", vertex.shape="sphere", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
-       vertex.label = character.labels, canvas.width = 700, canvas.height = 700)
+       canvas.width = 700, canvas.height = 700)
 
 ## find analogies ##
 ana.1 <- word_analogy(
   file_name = "vec.bin",
   search_words = "margueritedebourgogne philippedaunay blanchedebourgogne",
-  num = 20)
+  num = 10)
 
 ana.2 <- word_analogy(
   file_name = "vec.bin",
-  search_words = "louisv philippedepoitiers blanchedebourgogne",
-  num = 20)
+  search_words = "philippedaunay gautierdaunay blanchedebourgogne",
+  num = 10)
 
 ana.3 <- word_analogy(
   file_name = "vec.bin",
-  search_words = "isabelle robertdartois louisv",
-  num = 20)
+  search_words = "robertdartois isabelle louisv",
+  num = 10)
 
 ana.4 <- word_analogy(
   file_name = "vec.bin",
   search_words = "geoffroydecharnay jacquesdemolay margueritedebourgogne",
-  num = 20)
+  num = 10)
 
 ana.5 <- word_analogy(
   file_name = "vec.bin",
-  search_words = "mahautdebourgogne robertdartois gucciobaglioni",
-  num = 20)
+  search_words = "robertdartois mahautdebourgogne gucciobaglioni",
+  num = 10)
 
 library(ggplot2)
 library(network)
