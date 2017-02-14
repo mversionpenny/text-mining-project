@@ -19,7 +19,7 @@ library(RColorBrewer)
 # |          - stopWords: character vectors containning the stopwords       |
 # | *Outputs: - book: vector containing the lines of the text file          |
 # +-------------------------------------------------------------------------+
-prepare.text <- function(txtFile, stopWords){
+prepare.text <- function(txtFile, stopWords,removeStop = T){
   book <- readLines(txtFile, encoding = "UTF-8")
   book <- book[!(is.na(book) | book=="")]
   
@@ -27,7 +27,8 @@ prepare.text <- function(txtFile, stopWords){
   book <- sapply(book, tolower, USE.NAMES = F)
   
   # remove stopword
-  book <- removeWords(book, stopWords)
+  if (removeStop)
+    book <- removeWords(book, stopWords)
   
   # remove punctuation
   book <- removePunctuation(book)
