@@ -20,7 +20,7 @@ getCharactersVector <- function(file_name){
   file <- readLines(file_name, encoding = "UTF-8")
   characters.vector <- rep("", length(file))
   for(i in 1:length(file)){
-    characters.vector[i] <- file[i]
+    characters.vector[i] <- tolower(file[i])
   }
   return(characters.vector)
 }

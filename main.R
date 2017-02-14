@@ -20,15 +20,13 @@ library(stringr)
 library(networkD3)
 library(statnet)
 library(igraph)
-library(intergraph)
+
 
 # TODO : how to force???
 library(devtools)
 install_github("mukul13/rword2vec")
 library(rword2vec)
 
-install.packages("GGally")
-library(GGally)
 # install_github("bmschmidt/wordVectors")
 # library(wordVectors)
 # ls("package:rword2vec")
@@ -120,6 +118,7 @@ tkplot(w2v.igraph, vertex.color="lightblue", vertex.shape="sphere", vertex.size=
        vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
 
+## find analogies ##
 ana.1 <- word_analogy(
   file_name = "vec.bin",
   search_words = "margueritedebourgogne philippedaunay blanchedebourgogne",
@@ -150,8 +149,5 @@ library(network)
 ggnet2(w2v.igraph, color = "phono", palette = "Set1",edge.color = c( "grey50"),label=T)
 
 hs <- hub_score(lda.igraph.1, weights=NA)$vector
-plot(lda.igraph.1, vertex.size=hs*10, main="Hubs")
-as <- authority_score(lda.igraph.1, weights=NA)$vector
-tkplot(w2v.igraph, vertex.color="lightblue", vertex.shape="sphere", vertex.size=as*20, 
-       vertex.frame.color="gray", vertex.label.color="black", 
-       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
+tkplot(lda.igraph.1, vertex.size=hs*10, vertex.color="lightblue")
+
