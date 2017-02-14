@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# -*- coding: latin# -1 -*- #
+# -*- coding: utf-8 -*- #
 
 import sys
 import os
@@ -18,6 +18,8 @@ if __name__ == "__main__":
     #main(sys.argv[1], sys.argv[2])
 
     os.chdir(os.path.dirname(os.path.abspath(sys.argv[0])))
+
+    delete_accents("Stop-words-french.txt", "Stop-words-french-utf8.txt")
 
     SOURCE = "les_rois_maudits/txt/"
     TARGET = "les_rois_maudits/txt_woaccents/"

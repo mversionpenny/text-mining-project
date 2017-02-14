@@ -37,3 +37,16 @@ prepare.text <- function(txtFile, stopWords){
   
   return(book)
 }
+
+simple.visu <- function(tdm){
+  # fin frequent terms
+  findFreqTerms(tdm,50)
+  tdm.matrix <- as.matrix(tdm)
+  sums <- rowSums(tdm.matrix)
+  sorted <- sort(sums,decreasing = TRUE)
+  barplot(sorted[1:50], type = 'h', las=2)
+  
+  # word cloud
+  colors <- brewer.pal(8,"Set1")
+  wordcloud(names(sorted[1:50]), sorted[1:50], colors=colors)
+}
