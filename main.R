@@ -5,8 +5,8 @@
 # install missing packages
 list.of.packages <- c("rstudioapi", "RColorBrewer", "dplyr", "tm", "NLP", 
                       "wordcloud", "stringr","networkD3","rJava", "mallet", 
-                      "word2vec", "XML", "devtools", "statnet","igraph",
-                      "intergraph")
+                      "XML", "devtools", "statnet","igraph", "intergraph",
+                      "GGally")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos = "http://cran.rstudio.com/")
 
@@ -21,14 +21,14 @@ library(networkD3)
 library(statnet)
 library(igraph)
 library(intergraph)
+library(devtools)
+library(GGally)
 
 # TODO : how to force???
-library(devtools)
+
 install_github("mukul13/rword2vec")
 library(rword2vec)
 
-install.packages("GGally")
-library(GGally)
 # install_github("bmschmidt/wordVectors")
 # library(wordVectors)
 # ls("package:rword2vec")
@@ -38,12 +38,12 @@ library(GGally)
 bookpath = "les_rois_maudits/txt_processed_name/"
 final_bookpath = "les_rois_maudits/final_txt/"
 txtbook1 = "[Rois Maudits-1] Le Roi de fer - Druon,Maurice.txt"
-txtbook2 = "[Rois Maudits-2] La Reine etranglee - Druon,Maurice.txt"
-txtbook3 = "[Rois Maudits-3] Les Poisons de la couro - Druon,Maurice.txt"
-txtbook4 = "[Rois Maudits-4] La Loi des males - Druon,Maurice.txt"
-txtbook5 = "[Rois Maudits-5] La Louve de France - Druon,Maurice.txt"
-txtbook6 = "[Rois Maudits-6] Le Lis et le Lion - Druon,Maurice.txt"
-txtbook7 = "[Rois Maudits-7] Quand un roi perd la Fr - Druon,Maurice.txt"
+# txtbook2 = "[Rois Maudits-2] La Reine etranglee - Druon,Maurice.txt"
+# txtbook3 = "[Rois Maudits-3] Les Poisons de la couro - Druon,Maurice.txt"
+# txtbook4 = "[Rois Maudits-4] La Loi des males - Druon,Maurice.txt"
+# txtbook5 = "[Rois Maudits-5] La Louve de France - Druon,Maurice.txt"
+# txtbook6 = "[Rois Maudits-6] Le Lis et le Lion - Druon,Maurice.txt"
+# txtbook7 = "[Rois Maudits-7] Quand un roi perd la Fr - Druon,Maurice.txt"
 # path to txt files containing the name of characters
 character_path = "les_rois_maudits/characters/"
 
@@ -72,6 +72,7 @@ source("networks.R")
 characters.vector.book1 <- 
   getCharactersVector(file.path(character_path, "characters1_clean_lowercase.txt"))
 
+character.labels <- readLines(file.path(character_path, "characters1_clean.txt"))
 ##### Get network with co-occurences ####
 co.oc.low <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.05)
 co.oc.low.igraph <- 
@@ -79,7 +80,8 @@ co.oc.low.igraph <-
             co.oc.low$x$links$value, characters.vector.book1)
 tkplot(co.oc.low.igraph, vertex.color="lightblue", vertex.shape="circle", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
-       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
+       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
+       vertex.label = character.labels, canvas.width = 700, canvas.height = 700)
 
 co.oc.high <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.15)
 co.oc.high.igraph <- 
@@ -87,7 +89,8 @@ co.oc.high.igraph <-
             co.oc.high$x$links$value, characters.vector.book1)
 tkplot(co.oc.high.igraph, vertex.color="lightblue", vertex.shape="circle", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
-       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
+       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
+       vertex.label = character.labels, canvas.width = 700, canvas.height = 700)
 
 ##### Get network with LDA (topic-modelling) ####
 m.disp1 <- getTopicsModelling(book1, stopwords_fr_path, 30)
@@ -97,7 +100,8 @@ lda.igraph.1 <-
             lda1$x$links$value, characters.vector.book1)
 tkplot(lda.igraph.1, vertex.color="lightblue", vertex.shape="sphere", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
-       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
+       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
+       vertex.label = character.labels, canvas.width = 700, canvas.height = 700)
 
 m.disp2 <- getTopicsModelling(book1, stopwords_fr_path, 200)
 lda2 <- getNetworkWithLDA(m.disp2, characters.vector.book1, sankey=T)
@@ -106,7 +110,8 @@ lda.igraph.2 <-
             lda2$x$links$value, characters.vector.book1)
 tkplot(lda.igraph.2, vertex.color="lightblue", vertex.shape="sphere", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
-       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
+       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
+       vertex.label = character.labels, canvas.width = 700, canvas.height = 700)
 
 ##### Get network with Word2Vec ####
 # do not run if you want the same result as us
@@ -118,7 +123,8 @@ w2v.igraph <-
             w2v$x$links$value, characters.vector.book1)
 tkplot(w2v.igraph, vertex.color="lightblue", vertex.shape="sphere", vertex.size=12, 
        vertex.frame.color="gray", vertex.label.color="black", 
-       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2)
+       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
+       vertex.label = character.labels, canvas.width = 700, canvas.height = 700)
 
 ana.1 <- word_analogy(
   file_name = "vec.bin",
