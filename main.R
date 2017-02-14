@@ -5,8 +5,7 @@
 # install missing packages
 list.of.packages <- c("rstudioapi", "RColorBrewer", "dplyr", "tm", "NLP", 
                       "wordcloud", "stringr","networkD3","rJava", "mallet", 
-                      "XML", "devtools", "statnet","igraph", "intergraph",
-                      "GGally")
+                      "XML", "devtools", "statnet","igraph")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages, repos = "http://cran.rstudio.com/")
 
@@ -20,22 +19,14 @@ library(stringr)
 library(networkD3)
 library(statnet)
 library(igraph)
-<<<<<<< HEAD
 
-=======
-library(intergraph)
 library(devtools)
-library(GGally)
->>>>>>> 2ada26b98ded47dd9a12a6ab3bbadf60a9caa038
+
 
 # TODO : how to force???
 
 install_github("mukul13/rword2vec")
 library(rword2vec)
-
-# install_github("bmschmidt/wordVectors")
-# library(wordVectors)
-# ls("package:rword2vec")
 
 #### Books (cut) ####
 # path to txt files containnig the books (without bibliography at the end)
