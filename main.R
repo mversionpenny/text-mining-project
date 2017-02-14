@@ -72,6 +72,7 @@ characters.vector.book1 <-
 character.labels <- readLines(file.path(character_path, "characters1_clean.txt"))
 ##### Get network with co-occurences ####
 co.oc.low <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.05)
+co.oc.low
 co.oc.low.igraph <- 
   getIgraph(co.oc.low$x$links$source, co.oc.low$x$links$target, 
             co.oc.low$x$links$value, characters.vector.book1)
@@ -81,11 +82,12 @@ tkplot(co.oc.low.igraph, vertex.color="lightblue", vertex.shape="circle", vertex
        canvas.width = 700, canvas.height = 700)
 
 co.oc.high <- getNetworkWithAssocs(book1.tdm, characters.vector.book1, cor=0.15)
+co.oc.high
 co.oc.high.igraph <- 
   getIgraph(co.oc.high$x$links$source, co.oc.high$x$links$target, 
             co.oc.high$x$links$value, characters.vector.book1)
-tkplot(co.oc.high.igraph, vertex.color="lightblue", vertex.shape="circle", vertex.size=12, 
-       vertex.frame.color="gray", vertex.label.color="black", 
+tkplot(co.oc.high.igraph, vertex.color="lightblue", vertex.shape="circle", 
+       vertex.size=12, vertex.frame.color="gray", vertex.label.color="black", 
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
        canvas.width = 700, canvas.height = 700)
 
@@ -95,6 +97,7 @@ tkplot(co.oc.high.igraph, vertex.color="lightblue", vertex.shape="circle", verte
 # save(m.disp1, file = "m.disp1.RData")
 load("m.disp1.RData")
 lda1 <- getNetworkWithLDA(m.disp1, characters.vector.book1, sankey=T)
+lda1
 lda.igraph.1 <- 
   getIgraph(lda1$x$links$source, lda1$x$links$target, 
             lda1$x$links$value, characters.vector.book1)
@@ -108,6 +111,7 @@ tkplot(lda.igraph.1, vertex.color="lightblue", vertex.shape="sphere", vertex.siz
 # save(m.disp2, file = "m.disp2.RData")
 load("m.disp2.RData")
 lda2 <- getNetworkWithLDA(m.disp2, characters.vector.book1, sankey=T)
+lda2
 lda.igraph.2 <- 
   getIgraph(lda2$x$links$source, lda2$x$links$target, 
             lda2$x$links$value, characters.vector.book1)
@@ -116,11 +120,17 @@ tkplot(lda.igraph.2, vertex.color="lightblue", vertex.shape="sphere", vertex.siz
        vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
        canvas.width = 700, canvas.height = 700)
 
+##### Get network with LDA 200 ponderated ####
+hs <- hub_score(lda.igraph.2, weights=NA)$vector
+tkplot(lda.igraph.2, vertex.size=hs*12,  vertex.label.color="black", 
+       vertex.label.dist=0.7,vertex.color="lightblue")
+
 ##### Get network with Word2Vec ####
 # do not run if you want the same result as us
 # model <-word2vec(train_file = file.path(final_bookpath,txtbook1),
 #                  output_file = "vec.bin",binary=1)
 w2v <- getNetworkWithWord2Vec("vec.bin", characters.vector.book1, dist = 25)
+w2v
 w2v.igraph <- 
   getIgraph(w2v$x$links$source, w2v$x$links$target, 
             w2v$x$links$value, characters.vector.book1)
@@ -139,26 +149,80 @@ ana.2 <- word_analogy(
   file_name = "vec.bin",
   search_words = "philippedaunay gautierdaunay blanchedebourgogne",
   num = 10)
+ana.2
 
 ana.3 <- word_analogy(
   file_name = "vec.bin",
   search_words = "robertdartois isabelle louisv",
   num = 10)
+ana.3
 
 ana.4 <- word_analogy(
   file_name = "vec.bin",
   search_words = "geoffroydecharnay jacquesdemolay margueritedebourgogne",
   num = 10)
+ana.4
 
 ana.5 <- word_analogy(
   file_name = "vec.bin",
   search_words = "mahautdebourgogne robertdartois eliabeldecressay",
   num = 10)
+ana.5
 
-library(ggplot2)
-library(network)
-ggnet2(w2v.igraph, color = "phono", palette = "Set1",edge.color = c( "grey50"),label=T)
+#### Sentiment Analysis ####
+# do not run if you want the same result as us
+# m.disp.sentiment.analysis <- getTopicsModelling(book1, stopwords_fr_path, 200, num.top.words = 30)
+# save(m.disp, file = "m.disp.sentiment.analysis.RData")
+load("m.disp.sentiment.analysis.RData")
 
-hs <- hub_score(lda.igraph.1, weights=NA)$vector
-tkplot(lda.igraph.1, vertex.size=hs*10, vertex.color="lightblue")
+# Vectors for sentiments
+negatif <- c("colere","recriminer" ,"haine", "furieux", "rage", "deteste",
+             "hais", "crier", "hurler", "haissent", "froide", "tortures")
+positif <- c("gai", "tendre", "aime", "aimes", "aiment", "joie", "amant", 
+             "douceur", "amour", "joui", "amant","compagnon")
+famille <- c("freres","frere", "cousin", "cousins", "soeurs", "soeur", "pere", 
+             "mere", "tante", "oncle", "epoux", "epouse", "mari", "bellesoeurs",
+             "fils", "fille")
+
+
+## Negative sentiments ##
+lda.negatif <- getNetworkWithLDASentimentAnalysis(m.disp, 
+                                                  characters.vector.book1, 
+                                                  sentimentvec= negatif,sankey=T)
+lda.negatif.igraph <- 
+  getIgraph(lda.negatif$x$links$source, lda.negatif$x$links$target, 
+            lda.negatif$x$links$value, characters.vector.book1)
+tkplot(lda.negatif.igraph, vertex.color="lightblue", vertex.shape="sphere", 
+       vertex.size=12, vertex.frame.color="gray", vertex.label.color="black", 
+       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
+       canvas.width = 700, canvas.height = 700)
+
+## Positive sentiments ##
+lda.positif <- getNetworkWithLDASentimentAnalysis(m.disp, 
+                                                  characters.vector.book1, 
+                                                  sentimentvec= positif,sankey=T)
+lda.positif.igraph <- 
+  getIgraph(lda.positif$x$links$source, lda.positif$x$links$target, 
+            lda.positif$x$links$value, characters.vector.book1)
+tkplot(lda.positif.igraph, vertex.color="lightblue", vertex.shape="sphere", 
+       vertex.size=12, vertex.frame.color="gray", vertex.label.color="black", 
+       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
+       canvas.width = 700, canvas.height = 700)
+
+
+## Familiar sentiments ##
+lda.famille <- getNetworkWithLDASentimentAnalysis(m.disp, 
+                                                characters.vector.book1, 
+                                                sentimentvec= famille,sankey=T)
+
+lda.famille.igraph <- 
+  getIgraph(lda.famille$x$links$source, lda.famille$x$links$target, 
+            lda.famille$x$links$value, characters.vector.book1)
+tkplot(lda.famille.igraph, vertex.color="lightblue", vertex.shape="sphere", 
+       vertex.size=12, vertex.frame.color="gray", vertex.label.color="black", 
+       vertex.label.cex=1.2, vertex.label.dist=0.5, edge.curved=0.2,
+       canvas.width = 700, canvas.height = 700)
+
+
+
 
