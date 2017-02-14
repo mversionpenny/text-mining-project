@@ -152,7 +152,7 @@ ana.4 <- word_analogy(
 
 ana.5 <- word_analogy(
   file_name = "vec.bin",
-  search_words = "robertdartois mahautdebourgogne gucciobaglioni",
+  search_words = "mahautdebourgogne robertdartois eliabeldecressay",
   num = 10)
 
 library(ggplot2)
