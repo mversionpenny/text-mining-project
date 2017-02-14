@@ -32,9 +32,13 @@ getCharactersVector <- function(file_name){
 # | *Inputs: - book: text                                                   |
 # |          - stoplist: words to remove                                    |
 # |          - k: number of topics the user wishes                          |
+# |          - alpha.sum: manitude of Dirichlet Prior over the topic        |
+# |            distribution                                                 |
+# |          - beta: per-word weight of the Dirichlet Prior                 |
 # | *Outputs: - m.disp: topics with words distribution                      |
 # +-------------------------------------------------------------------------+
-getTopicsModelling <- function(book, stoplist, k){
+getTopicsModelling <- 
+  function(book, stoplist, k, alpha.sum = 5.0, beta=10, num.top.words=10){
   lda.id <- 1:length(book)
   # setting the delimiters
   token.regexp <- "\\p{L}[\\p{L}\\p{P}]+\\p{L}"
@@ -48,7 +52,7 @@ getTopicsModelling <- function(book, stoplist, k){
   # Estimation of LDA parameters
 
   # preparation
-  topic.model <- MalletLDA(num.topics=k)
+  topic.model <- MalletLDA(num.topics=k, alpha.sum = alpha.sum, beta=beta)
   topic.model$loadDocuments(mallet.instances)
 
   # train the model
@@ -60,7 +64,7 @@ getTopicsModelling <- function(book, stoplist, k){
   topic.todisp <- 1:k
   m.disp <- do.call(cbind,
               sapply(topic.todisp,
-                function(x) format(mallet.top.words(topic.model, topic.words[x,]))))
+                function(x) format(mallet.top.words(topic.model, topic.words[x,],num.top.words=num.top.words))))
   colnames(m.disp) <- sapply(topic.todisp, function(x) c(paste("z",x), "p(w/z)"))
   return(m.disp)
 }
@@ -230,7 +234,7 @@ getNetworkWithLDA <- function(m.disp, characters.vector, sankey=T){
 # |          - characters.vector: vector of characters the user wants to    |
 # |            find relationships for                                       |
 # |          - dist: maximum distance between two characters to count their |
-#              relation as valuable enough.                                 |
+# |             relation as valuable enough.                                |
 # |          - sankey: logical, if True then the network will be of kind    |
 # |            "Sankey"                                                     |
 # | *Outputs: - network: dynamic network of characters. When called, plot   |
@@ -257,6 +261,69 @@ getNetworkWithWord2Vec <- function(word2vecFile, characters.vector, dist=20, san
       
   }
 
+  
+  links <- data.frame(source=vec1, target=vec2, value=vec3)
+  
+  
+  if(sankey==T){
+    return(sankeyNetwork(Links = links, Nodes = nodes, Source = "source",
+                         Target = "target", Value = "value", NodeID = "name",
+                         units = "m", fontSize = 12, nodeWidth = 30))
+  }
+  else{
+    return(forceNetwork(Links = links, Nodes = nodes,
+                        Source = "source", Target = "target",
+                        Value = "value", NodeID = "name",
+                        Group = "group", opacity = 0.8))
+  }
+}
+
+# +-------------------------------------------------------------------------+
+# | *Function : getNetworkWithLDASentimentAnalysis                          |
+# | *Description: function which uses topic-modelling to find relationships |
+# |               between characters in a text, and creates a newtwork with |
+# |               the result                                                |
+# |                                                                         |
+# | *Inputs: - m.disp: distribution of words for topics                     |
+# |          - characters.vector: vector of characters the user wants to    |
+# |            find relationships for                                       |
+# |          - sankey: logical, if True then the network will be of kind    |
+# |            "Sankey"                                                     |
+# |          - sentimentvec: vecteur de sentiment a observer entre les      |
+# |            différents personnages                                       |
+# | *Outputs: - network: dynamic network of characters. When called, plot   |
+# |             itself into plot-window                                     |
+# +-------------------------------------------------------------------------+
+getNetworkWithLDASentimentAnalysis <- 
+  function(m.disp, characters.vector, sentimentvec, sankey=T){
+  nodes <- 
+    data.frame(name = characters.vector, group=rep(1,length(characters.vector)))
+  vec1 <- c()
+  vec2 <- c()
+  vec3 <- c()
+  
+  i <- 1
+  nb.topics <- ncol(m.disp)
+  nb.words <- nrow(m.disp)
+  while(i < nb.topics) {
+    for(j in 1:(length(characters.vector)-1)){
+      if(characters.vector[j] %in% m.disp[,i]){
+        for(k in (j+1):length(characters.vector)){
+          if(characters.vector[k] %in% m.disp[,i]){
+            for(m in 1:length(sentimentvec)){
+              if(sentimentvec[m] %in% m.disp[,i]){
+                vec1 <- c(vec1,(j-1))
+                vec2 <- c(vec2,(k-1))
+                vec3 <- c(vec3,1)
+              }
+            }
+            
+          }
+        }
+      }
+    }
+    i <- i + 2
+  }
   
   links <- data.frame(source=vec1, target=vec2, value=vec3)
   
