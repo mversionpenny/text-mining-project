@@ -47,6 +47,6 @@ simple.visu <- function(tdm){
   barplot(sorted[1:50], type = 'h', las=2)
   
   # word cloud
-  colors <- brewer.pal(9,"Set2")
+  colors <- brewer.pal(8,"Set1")
   wordcloud(names(sorted[1:50]), sorted[1:50], colors=colors)
 }
