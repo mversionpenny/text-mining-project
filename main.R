@@ -23,8 +23,6 @@ library(igraph)
 library(devtools)
 
 
-# TODO : how to force???
-
 install_github("mukul13/rword2vec")
 library(rword2vec)
 
